@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieval Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="page">
+        <header class="masthead">
+            <h1>Retrieval Lab</h1>
+            <p class="masthead-sub">Comparing six ranking models over a Simple Wikipedia index</p>
+        </header>
+
+        <form method="POST" action="/" class="query-form">
+            <div class="query-row">
+                <div class="input-wrap">
+                    <div class="ghost" aria-hidden="true"><span class="ghost-typed"></span><span class="ghost-suggestion"></span></div>
+                    <input type="text" id="query" name="query" placeholder="Search the index…" value="{{ query }}" autocomplete="off">
+                </div>
+                <button type="submit">Search</button>
+            </div>
+
+            <div class="model-row" role="group" aria-label="Ranking model">
+                {% for m in models %}
+                <label class="model-toggle {% if model == m %}is-active{% endif %}">
+                    <input type="radio" name="model" value="{{ m }}" {% if model == m %}checked{% endif %} onchange="this.form.submit()">
+                    <span>{{ m|replace("_", " ") }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </form>
+
+        {% if error %}
+        <div class="error" role="alert">
+            <strong>Search failed.</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        {% if query and not error %}
+            {% if results %}
+            <p class="results-meta">{{ results|length }} result{{ "s" if results|length != 1 else "" }} for &ldquo;{{ query }}&rdquo;, ranked by {{ model|replace("_", " ") }}.</p>
+            <ol class="ranked-list">
+                {% for result in results %}
+                <li class="ranked-item">
+                    <div class="ranked-row">
+                        <span class="rank">{{ "%02d"|format(loop.index) }}</span>
+                        <span class="title">{{ result['title'] }}</span>
+                        <span class="score">{{ "%.4f"|format(result['score']) }}</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="--bar-target: {{ result['bar_pct'] }}%"></div>
+                    </div>
+                    <p class="excerpt">{{ result['content'] }}</p>
+                    <button type="button" class="excerpt-toggle">Read more</button>
+                </li>
+                {% endfor %}
+            </ol>
+            {% else %}
+            <div class="empty-state">
+                <p>No matches for &ldquo;{{ query }}&rdquo; under {{ model|replace("_", " ") }}. Try a different model or a broader query.</p>
+            </div>
+            {% endif %}
+        {% elif not query %}
+        <div class="empty-state">
+            <p>Enter a query above to see how {{ model|replace("_", " ") }} ranks the corpus.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

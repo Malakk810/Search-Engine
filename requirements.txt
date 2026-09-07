@@ -1,0 +1,24 @@
+# pinned for Intel Mac compatibility — needs Python 3.12, not 3.13
+# torch 2.2.2 is the last version with an Intel macOS wheel
+# tensorflow 2.16.2 is the last version with an Intel macOS wheel
+
+# core
+flask
+pandas
+beautifulsoup4
+lxml
+nltk
+python-terrier
+numpy<2.0,>=1.26.0
+mwparserfromhell
+
+# BERT
+torch==2.2.2
+sentence-transformers==3.0.1
+
+# tensorflow is needed for the RNN autocomplete feature, not just ELMo
+tensorflow==2.16.2
+
+# only needed if testing/keeping the ELMo model
+tensorflow-hub==0.16.1
+setuptools<81  # tensorflow-hub 0.16.1 still needs pkg_resources, dropped from newer setuptools
